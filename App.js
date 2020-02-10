@@ -4,8 +4,21 @@ import { WebView } from 'react-native-webview';
 import { DeviceMotion } from 'expo-sensors';
 
 onMotionDetected = (webview, data) => {
-  if(webview){
+  if (webview) {
     webview.postMessage(JSON.stringify(data));
+  }
+}
+
+const throttle = (func, limit) => {
+  let inThrottle
+  return function() {
+    const args = arguments
+    const context = this
+    if (!inThrottle) {
+      func.apply(context, args)
+      inThrottle = true
+      setTimeout(() => inThrottle = false, limit)
+    }
   }
 }
 
@@ -16,10 +29,10 @@ export default function App() {
     if(!isAvailable) console.error("Device motion not available")
   })
 
-  DeviceMotion.addListener((data) => onMotionDetected(webview, data))
+  DeviceMotion.addListener(throttle((data) => onMotionDetected(webview, data), 5))
 
   return <WebView
-    source={{ uri: 'https://a13736e1.ngrok.io' }}
+    source={{ uri: 'https://gyrosynth.ngrok.io' }}
     ref={( view ) => webview = view}
   />
 }
